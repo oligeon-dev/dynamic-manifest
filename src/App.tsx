@@ -90,7 +90,7 @@ function App() {
   useEffect(() => {
     (async () => {
       try {
-        const url = await getManifestURL('アプリ名');
+        const url = await getManifestURL('アプリ名2');
         const link: HTMLLinkElement =
           document.querySelector('link[rel="manifest"]') ||
           (() => {
