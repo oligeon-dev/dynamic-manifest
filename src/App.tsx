@@ -76,7 +76,7 @@ function App() {
         document.head.appendChild(el);
         return el;
       })();
-    link.setAttribute('href', getBlobURL('アプリ名'));
+    link.setAttribute('href', getBlobURL('アプリ名2'));
   }, []);
 
   return (
