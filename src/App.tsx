@@ -56,7 +56,7 @@ export default function App() {
 
   // ← ここで本当にインストールさせたい「新しい appName」をセット
   // 例: 画面上の入力や props, あるいはビルド時に変わる値など
-  const dynamicAppName = 'アプリ名 X2';
+  const dynamicAppName = 'アプリ名 X3';
 
   // For Android
   useEffect(() => {
