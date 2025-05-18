@@ -7,11 +7,19 @@ const PRECACHE_URLS = [
 ];
 
 self.addEventListener('install', (e) => {
-  console.log('[SW] install');
   e.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then(async (cache) => {
+        const urls = ['/manifest.json' /*…*/];
+        await Promise.all(
+          urls.map((url) =>
+            cache.add(url).catch((err) => {
+              console.warn('[SW] failed to cache', url, err);
+            })
+          )
+        );
+      })
       .then(() => self.skipWaiting())
   );
 });
