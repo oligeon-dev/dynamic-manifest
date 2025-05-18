@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 
-const CACHE_NAME = 'my-app-cache';
+const CACHE_NAME = 'my-manifest-cache';
 const MANIFEST_CACHE_KEY = '/manifest.json';
 
 function makeManifest(appName: string) {
@@ -55,7 +55,7 @@ export default function App() {
 
   // ← ここで本当にインストールさせたい「新しい appName」をセット
   // 例: 画面上の入力や props, あるいはビルド時に変わる値など
-  const dynamicAppName = 'アプリ名4';
+  const dynamicAppName = 'アプリ名';
 
   useEffect(() => {
     (async () => {
