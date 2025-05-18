@@ -55,7 +55,7 @@ export default function App() {
 
   // ← ここで本当にインストールさせたい「新しい appName」をセット
   // 例: 画面上の入力や props, あるいはビルド時に変わる値など
-  const dynamicAppName = 'アプリ名3';
+  const dynamicAppName = 'アプリ名1';
 
   useEffect(() => {
     (async () => {
@@ -63,7 +63,7 @@ export default function App() {
       const prevName = await getCachedAppName();
 
       // 2) 新しい名前でキャッシュを上書き
-      await cacheDynamicManifest(dynamicAppName);
+      // await cacheDynamicManifest(dynamicAppName);
 
       // 3) 比較。以前あって、かつ変わっていればバナーを出す
       if (prevName !== null && prevName !== dynamicAppName) {
