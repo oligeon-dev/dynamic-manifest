@@ -51,7 +51,7 @@ function getBlobURL(appName: string) {
 
 export default function App() {
   // const [cachedAppName, setCachedAppName] = useState<string | null>(null);
-  const [appName, setAppName] = useState('');
+  const [appName, setAppName] = useState(localStorage.getItem('name') ?? '');
   const [showBanner, setShowBanner] = useState(false);
 
   // ← ここで本当にインストールさせたい「新しい appName」をセット
@@ -59,34 +59,34 @@ export default function App() {
   const dynamicAppName = 'アプリ名';
 
   useEffect(() => {
-    (async () => {
-      const name = localStorage.getItem('name');
-      if (!name) {
-        localStorage.setItem('name', dynamicAppName);
-        setAppName(dynamicAppName);
-      } else {
-        if (name !== dynamicAppName) {
-          setShowBanner(true);
-        }
+    // (async () => {
+    const name = localStorage.getItem('name');
+    if (!name) {
+      localStorage.setItem('name', dynamicAppName);
+      setAppName(dynamicAppName);
+    } else {
+      if (name !== dynamicAppName) {
+        setShowBanner(true);
       }
+    }
 
-      // 1) 以前のキャッシュ名を取得
-      // const prevName = await getCachedAppName();
+    // 1) 以前のキャッシュ名を取得
+    // const prevName = await getCachedAppName();
 
-      // 2) 新しい名前でキャッシュを上書き
-      // await cacheDynamicManifest(dynamicAppName);
+    // 2) 新しい名前でキャッシュを上書き
+    // await cacheDynamicManifest(dynamicAppName);
 
-      // 3) 比較。以前あって、かつ変わっていればバナーを出す
-      // console.info('prevName', prevName);
-      // if (prevName !== null && prevName !== dynamicAppName) {
-      // setShowBanner(true);
-      // } else {
-      // await cacheDynamicManifest(dynamicAppName);
-      // }
+    // 3) 比較。以前あって、かつ変わっていればバナーを出す
+    // console.info('prevName', prevName);
+    // if (prevName !== null && prevName !== dynamicAppName) {
+    // setShowBanner(true);
+    // } else {
+    // await cacheDynamicManifest(dynamicAppName);
+    // }
 
-      // 4) 最新を画面表示用にセット
-      // setCachedAppName(dynamicAppName);
-    })();
+    // 4) 最新を画面表示用にセット
+    // setCachedAppName(dynamicAppName);
+    // })();
   }, [dynamicAppName]);
 
   useEffect(() => {
