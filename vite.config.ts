@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      manifest: false,
       workbox: {
         cacheId: 'my-app-cache', // ← これでキャッシュID（名前）を上書き
         runtimeCaching: [
