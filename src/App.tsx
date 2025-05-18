@@ -55,7 +55,7 @@ export default function App() {
 
   // ← ここで本当にインストールさせたい「新しい appName」をセット
   // 例: 画面上の入力や props, あるいはビルド時に変わる値など
-  const dynamicAppName = 'アプリ名1';
+  const dynamicAppName = 'アプリ名3';
 
   useEffect(() => {
     (async () => {
@@ -68,6 +68,8 @@ export default function App() {
       // 3) 比較。以前あって、かつ変わっていればバナーを出す
       if (prevName !== null && prevName !== dynamicAppName) {
         setShowBanner(true);
+      } else {
+        await cacheDynamicManifest(dynamicAppName);
       }
 
       // 4) 最新を画面表示用にセット
