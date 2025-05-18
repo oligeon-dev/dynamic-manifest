@@ -1,76 +1,119 @@
 // src/App.tsx
 import { useEffect, useState } from 'react';
+import './App.css';
 
-const INSTALLED_KEY = 'installedAppName';
-const DYNAMIC_APP_NAME = 'アプリ名X'; // ここはビルド時／サーバー想定の値に置き換えてください
+// const CACHE_NAME = 'my-app-cache';
+// const MANIFEST_CACHE_KEY = '/manifest.json';
+
+function makeManifest(appName: string) {
+  const baseUrl = window.location.origin;
+  return {
+    name: appName,
+    short_name: appName,
+    theme_color: '#000000',
+    display: 'standalone',
+    start_url: baseUrl,
+    icons: [
+      { src: `${baseUrl}/192.png`, sizes: '192x192', type: 'image/png' },
+      { src: `${baseUrl}/512.png`, sizes: '512x512', type: 'image/png' },
+    ],
+  };
+}
+
+// async function cacheDynamicManifest(appName: string) {
+//   const manifestString = JSON.stringify(makeManifest(appName));
+//   const resp = new Response(manifestString, {
+//     headers: { 'Content-Type': 'application/json' },
+//   });
+//   const cache = await caches.open(CACHE_NAME);
+//   await cache.put(MANIFEST_CACHE_KEY, resp);
+// }
+
+// async function getCachedAppName(): Promise<string | null> {
+//   const cache = await caches.open(CACHE_NAME);
+//   const resp = await cache.match(MANIFEST_CACHE_KEY);
+//   if (!resp) return null;
+//   try {
+//     const json = await resp.json();
+//     return typeof json.name === 'string' ? json.name : null;
+//   } catch {
+//     return null;
+//   }
+// }
+
+function getBlobURL(appName: string) {
+  return URL.createObjectURL(
+    new Blob([JSON.stringify(makeManifest(appName))], {
+      type: 'application/json',
+    })
+  );
+}
 
 export default function App() {
+  // const [cachedAppName, setCachedAppName] = useState<string | null>(null);
+  const [appName, setAppName] = useState('');
   const [showBanner, setShowBanner] = useState(false);
-  const [installedName, setInstalledName] = useState<string | null>(null);
 
-  // インストール済みの名前を localStorage から読み込む
+  // ← ここで本当にインストールさせたい「新しい appName」をセット
+  // 例: 画面上の入力や props, あるいはビルド時に変わる値など
+  const dynamicAppName = 'アプリ名';
+
   useEffect(() => {
-    const prev = localStorage.getItem(INSTALLED_KEY);
-    setInstalledName(prev);
-    // もし前回保存があって、かつ名前が変わっていればバナー表示
-    if (prev !== null && prev !== DYNAMIC_APP_NAME) {
-      setShowBanner(true);
-    }
-  }, []);
+    (async () => {
+      const name = localStorage.getItem('name');
+      if (!name) {
+        localStorage.setItem('name', dynamicAppName);
+        setAppName(dynamicAppName);
+      } else {
+        if (name !== dynamicAppName) {
+          setShowBanner(true);
+        }
+      }
 
-  // iOS Safari のスタンドアロン起動 or Chrome の appinstalled を検出して保存
+      // 1) 以前のキャッシュ名を取得
+      // const prevName = await getCachedAppName();
+
+      // 2) 新しい名前でキャッシュを上書き
+      // await cacheDynamicManifest(dynamicAppName);
+
+      // 3) 比較。以前あって、かつ変わっていればバナーを出す
+      // console.info('prevName', prevName);
+      // if (prevName !== null && prevName !== dynamicAppName) {
+      // setShowBanner(true);
+      // } else {
+      // await cacheDynamicManifest(dynamicAppName);
+      // }
+
+      // 4) 最新を画面表示用にセット
+      // setCachedAppName(dynamicAppName);
+    })();
+  }, [dynamicAppName]);
+
   useEffect(() => {
-    const markInstalled = () => {
-      localStorage.setItem(INSTALLED_KEY, DYNAMIC_APP_NAME);
-      setInstalledName(DYNAMIC_APP_NAME);
-      setShowBanner(false);
-    };
-
-    // Android Chrome, Edge, etc.
-    window.addEventListener('appinstalled', markInstalled);
-
-    // iOS Safari の standalone 起動検出
-    const checkStandalone = () => {
-      const isStandalone =
-        window.matchMedia('(display-mode: standalone)').matches ||
-        // iOS <13
-        (navigator as any).standalone === true;
-      if (isStandalone) {
-        markInstalled();
-      }
-    };
-    window.addEventListener('load', checkStandalone);
-    // ナビゲーション時も (例えば戻るボタン)
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        checkStandalone();
-      }
-    });
-
-    return () => {
-      window.removeEventListener('appinstalled', markInstalled);
-      window.removeEventListener('load', checkStandalone);
-      document.removeEventListener('visibilitychange', checkStandalone);
-    };
-  }, []);
-
-  const handleDismiss = () => {
-    setShowBanner(false);
-  };
+    // PWA 用リンクは Blob URL のまま
+    const link: HTMLLinkElement =
+      document.querySelector('link[rel="manifest"]') ||
+      (() => {
+        const el = document.createElement('link');
+        el.setAttribute('rel', 'manifest');
+        document.head.appendChild(el);
+        return el;
+      })();
+    link.setAttribute('href', getBlobURL(dynamicAppName));
+  }, [dynamicAppName]);
 
   return (
-    <div>
+    <div className='App'>
       {showBanner && (
         <div className='update-banner'>
           ⚠️ アプリ名が変更されました。再インストールしてください。
-          <button onClick={handleDismiss}>閉じる</button>
         </div>
       )}
-      <div>
-        インストール済みのアプリ名: {installedName ?? '（未インストール）'}
+
+      <div className='cached-app-name'>
+        {/* 画面上で、キャッシュにある「最新の」名前を表示 */}
+        現在キャッシュされているアプリ名: {appName}
       </div>
-      <div>これからインストールするアプリ名: {DYNAMIC_APP_NAME}</div>
-      {/* …他の UI… */}
     </div>
   );
 }
