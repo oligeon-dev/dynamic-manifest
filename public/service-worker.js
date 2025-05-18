@@ -14,7 +14,7 @@ self.addEventListener('fetch', (event) => {
       if (cached) return cached;
       return fetch(event.request).then((response) => {
         const clone = response.clone();
-        caches.open('runtime-cache').then((cache) => {
+        caches.open('my-app-cache').then((cache) => {
           cache.put(event.request, clone);
         });
         return response;
