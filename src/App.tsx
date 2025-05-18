@@ -56,7 +56,21 @@ export default function App() {
 
   // ← ここで本当にインストールさせたい「新しい appName」をセット
   // 例: 画面上の入力や props, あるいはビルド時に変わる値など
-  const dynamicAppName = 'アプリ名 X2';
+  const dynamicAppName = 'アプリ名';
+
+  // For Android
+  useEffect(() => {
+    const onAppInstalled = () => {
+      localStorage.setItem('name', dynamicAppName);
+      // ここで必要なら、state 更新や Analytics 送信などを行う
+    };
+
+    window.addEventListener('appinstalled', onAppInstalled);
+
+    return () => {
+      window.removeEventListener('appinstalled', onAppInstalled);
+    };
+  }, []); // マウント時に一度だけ実行
 
   useEffect(() => {
     // (async () => {
