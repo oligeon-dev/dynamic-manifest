@@ -43,7 +43,7 @@ function App() {
   useEffect(() => {
     (async () => {
       // 1) 動的 manifest をキャッシュに登録
-      await cacheDynamicManifest('アプリ名');
+      await cacheDynamicManifest('アプリ名2');
 
       // 2) キャッシュから name を読み出し
       const name = await getCachedAppName();
