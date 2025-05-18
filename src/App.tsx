@@ -4,45 +4,23 @@ import './App.css';
 
 const CACHE_NAME = 'my-app-cache';
 
-// ① 比較＆変更検知 ⇒ 変更があればキャッシュを「新しい manifest.json のテキスト」で更新する
-async function isAppNameChanged(): Promise<boolean> {
+// キャッシュ内の manifest.json から name を取得
+async function getCachedAppName(): Promise<string | null> {
   const cache = await caches.open(CACHE_NAME);
-  const cachedResp = await cache.match('/manifest.json');
-
-  // 初回キャッシュ未登録時は「変更なし」で扱い（バナーは出さない）
-  if (!cachedResp) {
-    return false;
+  const resp = await cache.match('/manifest.json');
+  if (!resp) {
+    return null;
   }
-
-  // キャッシュ内 vs ネットワーク のテキストを取得
-  const [oldText, newText] = await Promise.all([
-    cachedResp.text(),
-    fetch('/manifest.json').then((r) => r.text()),
-  ]);
-
-  // JSON パースして name フィールドのみ比較
-  let changed = false;
   try {
-    const oldJson = JSON.parse(oldText);
-    const newJson = JSON.parse(newText);
-    changed = oldJson.name !== newJson.name;
+    const text = await resp.text();
+    const json = JSON.parse(text);
+    return typeof json.name === 'string' ? json.name : null;
   } catch {
-    // JSON パース失敗は無視（バナー出さない）
-    changed = false;
+    return null;
   }
-
-  if (changed) {
-    // 変更検知後にだけキャッシュを入れ替える
-    const response = new Response(newText, {
-      headers: { 'Content-Type': 'application/json' },
-    });
-    await cache.put('/manifest.json', response);
-  }
-
-  return changed;
 }
 
-// ② Blob URL 生成だけを行う関数
+// manifest 用の Blob URL を生成（キャッシュ更新は isAppNameChanged 側で行う想定）
 async function getManifestURL(appName: string): Promise<string> {
   const baseUrl = window.location.origin;
   const manifest = {
@@ -56,46 +34,65 @@ async function getManifestURL(appName: string): Promise<string> {
       { src: `${baseUrl}/512.png`, sizes: '512x512', type: 'image/png' },
     ],
   };
-
-  const manifestString = JSON.stringify(manifest);
-  const blob = new Blob([manifestString], { type: 'application/json' });
+  const str = JSON.stringify(manifest);
+  const blob = new Blob([str], { type: 'application/json' });
   return URL.createObjectURL(blob);
 }
 
 function App() {
   const [showBanner, setShowBanner] = useState(false);
+  const [cachedAppName, setCachedAppName] = useState<string | null>(null);
 
-  // マウント時に「名前が変わっていれば」バナー表示
+  // ① マニフェスト名の変更検知ロジック（前回キャッシュと最新を比較）
   useEffect(() => {
     (async () => {
+      // キャッシュから前回 name を取得
+      const prevName = await getCachedAppName();
+
+      // ネットワークから最新の manifest.json を取得しパース
+      const newText = await fetch('/manifest.json').then((r) => r.text());
+      let newName: string | null = null;
       try {
-        const changed = await isAppNameChanged();
-        if (changed) {
-          setShowBanner(true);
-        }
-      } catch (err) {
-        console.error('[appName-checker]', err);
+        const newJson = JSON.parse(newText);
+        newName = typeof newJson.name === 'string' ? newJson.name : null;
+      } catch {
+        newName = null;
       }
+
+      // 前回と今回で name が違えばバナー表示
+      if (prevName !== null && newName !== null && prevName !== newName) {
+        setShowBanner(true);
+      }
+
+      // 次回比較用にキャッシュを更新
+      if (newText) {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(
+          '/manifest.json',
+          new Response(newText, {
+            headers: { 'Content-Type': 'application/json' },
+          })
+        );
+      }
+
+      // キャッシュされている最新の name を state にセット
+      setCachedAppName(newName);
     })();
   }, []);
 
-  // マウント時に Blob URL を生成して <link> にセット
+  // ② PWA 用 <link rel="manifest"> の設定
   useEffect(() => {
     (async () => {
-      try {
-        const url = await getManifestURL('アプリ名2');
-        const link: HTMLLinkElement =
-          document.querySelector('link[rel="manifest"]') ||
-          (() => {
-            const el = document.createElement('link');
-            el.setAttribute('rel', 'manifest');
-            document.head.appendChild(el);
-            return el;
-          })();
-        link.setAttribute('href', url);
-      } catch (err) {
-        console.error('[App] manifest setup failed', err);
-      }
+      const url = await getManifestURL('アプリ名');
+      const link: HTMLLinkElement =
+        document.querySelector('link[rel="manifest"]') ||
+        (() => {
+          const el = document.createElement('link');
+          el.setAttribute('rel', 'manifest');
+          document.head.appendChild(el);
+          return el;
+        })();
+      link.setAttribute('href', url);
     })();
   }, []);
 
@@ -107,7 +104,14 @@ function App() {
           アプリ名が変更されました。最新のバージョンを再インストールしてください。
         </div>
       )}
-      {/* 以下、アプリの UI */}
+
+      {/* キャッシュにある現在の appName を表示 */}
+      <div className='cached-app-name'>
+        現在キャッシュされているアプリ名:{' '}
+        {cachedAppName ?? '（キャッシュなし）'}
+      </div>
+
+      {/* 以下、アプリ本体の UI */}
       <h1>My PWA</h1>
       {/* … */}
     </div>
