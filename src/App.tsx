@@ -66,6 +66,7 @@ export default function App() {
       // await cacheDynamicManifest(dynamicAppName);
 
       // 3) 比較。以前あって、かつ変わっていればバナーを出す
+      console.info('prevName', prevName);
       if (prevName !== null && prevName !== dynamicAppName) {
         setShowBanner(true);
       } else {
