@@ -1,7 +1,7 @@
 // src/App.tsx
+import { isStandalonePWA as isStandalonePWAFunc } from 'is-standalone-pwa';
 import { useEffect, useState } from 'react';
 import './App.css';
-
 // const CACHE_NAME = 'my-app-cache';
 // const MANIFEST_CACHE_KEY = '/manifest.json';
 
@@ -53,6 +53,8 @@ export default function App() {
   // const [cachedAppName, setCachedAppName] = useState<string | null>(null);
   const [appName, setAppName] = useState(localStorage.getItem('name') ?? '');
   const [showBanner, setShowBanner] = useState(false);
+  const isStandalonePWA = isStandalonePWAFunc();
+  console.info('isStandalonePWA', isStandalonePWA);
 
   // ← ここで本当にインストールさせたい「新しい appName」をセット
   // 例: 画面上の入力や props, あるいはビルド時に変わる値など
@@ -127,6 +129,7 @@ export default function App() {
       <div className='cached-app-name'>
         {/* 画面上で、キャッシュにある「最新の」名前を表示 */}
         現在キャッシュされているアプリ名: {appName}
+        isStandalonePWA: {isStandalonePWA ? 'TRUE' : 'FALSE'}
       </div>
     </div>
   );
