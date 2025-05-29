@@ -140,7 +140,7 @@ export default function App() {
 
       <div>
         <a
-          href='/Actionable-Gamification-Full-Book-part-1.pdf'
+          href='https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf'
           target='_blank'
           rel='noopener noreferrer'
         >
@@ -149,11 +149,11 @@ export default function App() {
       </div>
       <div>
         <a
-          href='/Actionable-Gamification-Full-Book-part-1.pdf#page=5'
+          href='https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf#page=3'
           target='_blank'
           rel='noopener noreferrer'
         >
-          PDF を開く(5ページ)
+          PDF を開く(3ページ)
         </a>
       </div>
       <div className='cached-app-name'>
