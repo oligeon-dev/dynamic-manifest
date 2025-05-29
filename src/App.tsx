@@ -23,7 +23,6 @@ function makeManifest(appName: string) {
         src: `${baseUrl}/152.png`,
         sizes: '152x152',
         type: 'image/png',
-        purpose: 'maskable',
       },
       { src: `${baseUrl}/192.png`, sizes: '192x192', type: 'image/png' },
       { src: `${baseUrl}/512.png`, sizes: '512x512', type: 'image/png' },
