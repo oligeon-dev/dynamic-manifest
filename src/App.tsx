@@ -138,6 +138,24 @@ export default function App() {
         </div>
       )}
 
+      <div>
+        <a
+          href='/Actionable-Gamification-Full-Book-part-1.pdf'
+          target='_blank'
+          rel='noopener noreferrer'
+        >
+          PDF を開く
+        </a>
+      </div>
+      <div>
+        <a
+          href='/Actionable-Gamification-Full-Book-part-1.pdf#page=5'
+          target='_blank'
+          rel='noopener noreferrer'
+        >
+          PDF を開く(5ページ)
+        </a>
+      </div>
       <div className='cached-app-name'>
         {/* 画面上で、キャッシュにある「最新の」名前を表示 */}
         現在キャッシュされているアプリ名: {appName}
